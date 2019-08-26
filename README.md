@@ -1,9 +1,13 @@
-# Activity in SCUT
+# Activities in SCUT
 
-## Frontend
+## frontend
 
 wxml + wxss + javascript
 
 ## backend
 
-spring boot + maven
+spring boot + mybatis
+
+## database
+
+MySQL
