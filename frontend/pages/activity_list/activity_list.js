@@ -60,6 +60,20 @@ Page({
     wx.hideLoading();
   },
 
+  // 页面展示活动
+  onShow: function () {
+    console.log("页面加载活动");
+    wx.showLoading({
+      title: '努力加载中...',
+    });
+    this.loadAcitivities();
+    this.setData({
+      idxOfTag: 0,
+      classification: '分类：全部显示',
+    });
+    wx.hideLoading();
+  },
+
   // 下拉更新活动
   onPullDownRefresh: function () {
     console.log("下拉更新活动");
@@ -83,8 +97,15 @@ Page({
       // 成功
       success: function (res) {
         console.log("后端获取活动 √成功", res.data.activityList);
+        var activityList = res.data.activityList;
+        for (var idx in activityList) {
+          var activity = activityList[idx];
+          console.log(typeof (activity.time));
+          activityList[idx].time = activity.time.substring(0, 10);
+          console.log(activityList[idx].time);
+        }
         that.setData({
-          activities: res.data
+          activities: activityList
         });
       },
       // 失败
@@ -92,6 +113,9 @@ Page({
         console.log("后端获取活动 ×失败", err);
       }
     });
+    // this.setData({
+    //   poster: '../../images/poster.jpg',
+    // })
   },
 
   // 跳转活动详情
@@ -104,16 +128,40 @@ Page({
 
   // 绑定分类选择器
   bindTagPickerChange: function (e) {
+    var that = this;
     console.log('picker发送选择改变，携带值为', e.detail.value);
     this.setData({
       idxOfTag: e.detail.value,
     });
+    // console.log(e.detail.value)
+    // console.log(typeof (this.data.idxOfTag))
+    // console.log(e.detail.value == "全部显示")
+    // if (e.detail.value == "全部显示") {
+    //   that.loadAcitivities()
+    // }
     this.setData({
-      classification: '分类：' + this.data.tag[this.data.idxOfTag],
+      classification: this.data.tag[this.data.idxOfTag],
     });
     console.log('分类为', this.data.classification);
     // TODO: 传idOfTag到后端进行分类
-    // ......
+    wx.request({
+      url: "http://localhost:8888/dbpractice/dbadmin/getactivitybytag?tag=" + that.data.idxOfTag, // 接口地址
+      method: 'GET', // 请求方法
+      header: {
+        'content-type': 'application/json' // 默认类型
+      },
+      // 成功
+      success: function (res) {
+        console.log("后端获取活动 √成功", res.data.activityList);
+        that.setData({
+          activities: res.data.activityList
+        });
+      },
+      // 失败
+      fail: function (err) {
+        console.log("后端获取活动 ×失败", err);
+      }
+    });
   },
 
   // 绑定排序选择器
@@ -123,7 +171,7 @@ Page({
       idxOfSort: e.detail.value,
     });
     this.setData({
-      order: '排序：' + this.data.sort[this.data.idxOfSort],
+      order: this.data.sort[this.data.idxOfSort],
     });
     console.log('排序为', this.data.order);
     // TODO: 传idOfSort到后端进行排序
@@ -140,9 +188,30 @@ Page({
 
   // 搜索提交
   SearchConfirm: function () {
+    var that = this;
     console.log("搜索提交：" + this.data.SearchData);
     // TODO: 传SearchData到后端进行搜索
     // ......
+    wx.request({
+      url: "http://localhost:8888/dbpractice/dbadmin/getactivitybykeyword?keyword=" + that.data.SearchData, // 接口地址
+      // url: "http://localhost:8888/dbpractice/dbadmin/getactivitybykeyword?keyword=开学", // 接口地址
+
+      method: 'GET', // 请求方法
+      header: {
+        'content-type': 'application/json' // 默认类型
+      },
+      // 成功
+      success: function (res) {
+        console.log("后端获取活动 √成功", res.data.activityList);
+        that.setData({
+          activities: res.data.activityList
+        });
+      },
+      // 失败
+      fail: function (err) {
+        console.log("后端获取活动 ×失败", err);
+      }
+    });
   },
 
   // 搜索清除
